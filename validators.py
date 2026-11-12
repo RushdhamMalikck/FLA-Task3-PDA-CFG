@@ -12,15 +12,10 @@ import re
 
 
 def check_palindrome(raw):
-    value = "".join(ch.lower() for ch in raw if ch.isalpha())
-    if not value:
-        return {
-            "accepted": False,
-            "title": "Rejected",
-            "message": "Enter at least one alphabetic character.",
-            "steps": ["No input symbols were available to process."],
-            "model": "NPDA-style palindrome recognizer"
-        }
+    # The application accepts case-insensitive ASCII letters and ignores
+    # punctuation/whitespace. The formal language itself is over {a,b} in
+    # the worked case study; the recognizer generalises this to ASCII letters.
+    value = "".join(ch.lower() for ch in raw if ch.isascii() and ch.isalpha())
 
     
     # Nondeterministic PDA idea:
@@ -107,9 +102,10 @@ def check_palindrome(raw):
 
 
 def check_html(source):
-    # Deliberately limited HTML subset: ordinary paired tags only.
-    # Attributes are allowed. Comments and void/self-closing tags are not.
+    # Deliberately limited tag language. A finite tag alphabet is required
+    # for a classical PDA model; real HTML has many additional lexical rules.
     token_re = re.compile(r"</?([A-Za-z][A-Za-z0-9-]*)\b[^>]*>")
+    allowed_tags = {"article", "div", "li", "p", "section", "span", "ul"}
     stack = []
     steps = []
     pos = 0
@@ -120,7 +116,7 @@ def check_html(source):
             "accepted": False, "title": "Rejected",
             "message": "Enter an HTML fragment to validate.",
             "steps": ["No HTML input was provided."],
-            "model": "PDA stack model for nested HTML tags"
+            "model": "PDA stack model for a finite set of nested tags"
         }
 
     # Ensure every angle-bracket tag-like region is tokenized in this subset.
@@ -131,7 +127,7 @@ def check_html(source):
                 "accepted": False, "title": "Rejected",
                 "message": "Malformed or unsupported tag syntax was found.",
                 "steps": [f"Unexpected tag syntax near: {between.strip()}"],
-                "model": "PDA stack model for nested HTML tags"
+                "model": "PDA stack model for a finite set of nested tags"
             }
         pos = match.end()
 
@@ -140,7 +136,7 @@ def check_html(source):
             "accepted": False, "title": "Rejected",
             "message": "Malformed or unsupported tag syntax was found.",
             "steps": ["The remaining input contains an unmatched '<' or '>'."],
-            "model": "PDA stack model for nested HTML tags"
+            "model": "PDA stack model for a finite set of nested tags"
         }
 
     for match in tokens:
@@ -149,9 +145,21 @@ def check_html(source):
         is_closing = token.startswith("</")
         is_self_closing = token.rstrip().endswith("/>")
 
+        if tag not in allowed_tags:
+            steps.append(f"{token}: tag is outside the supported finite alphabet -> REJECT.")
+            return {
+                "accepted": False, "title": "Rejected",
+                "message": f"Tag <{tag}> is not in the supported tag set.",
+                "steps": steps, "model": "PDA stack model for a finite set of nested tags"
+            }
+
         if is_self_closing:
-            steps.append(f"Self-closing tag {token}: accepted without stack change.")
-            continue
+            steps.append(f"{token}: self-closing tags are outside the supported model -> REJECT.")
+            return {
+                "accepted": False, "title": "Rejected",
+                "message": "Self-closing tags are outside this case study's language.",
+                "steps": steps, "model": "PDA stack model for a finite set of nested tags"
+            }
 
         if is_closing:
             if not stack:
@@ -159,7 +167,7 @@ def check_html(source):
                 return {
                     "accepted": False, "title": "Rejected",
                     "message": f"Closing tag </{tag}> has no matching opening tag.",
-                    "steps": steps, "model": "PDA stack model for nested HTML tags"
+                    "steps": steps, "model": "PDA stack model for a finite set of nested tags"
                 }
             top = stack[-1]
             if top != tag:
@@ -167,7 +175,7 @@ def check_html(source):
                 return {
                     "accepted": False, "title": "Rejected",
                     "message": f"Tag mismatch: expected </{top}> but found </{tag}>.",
-                    "steps": steps, "model": "PDA stack model for nested HTML tags"
+                    "steps": steps, "model": "PDA stack model for a finite set of nested tags"
                 }
             stack.pop()
             steps.append(f"{token}: POP '{tag}' -> stack {stack}")
@@ -180,14 +188,14 @@ def check_html(source):
             "accepted": False, "title": "Rejected",
             "message": "One or more opening tags were not closed.",
             "steps": steps + [f"Input ended with unclosed tags: {stack}"],
-            "model": "PDA stack model for nested HTML tags"
+            "model": "PDA stack model for a finite set of nested tags"
         }
 
     return {
         "accepted": True, "title": "Accepted",
-        "message": "All supported HTML tags are properly nested and closed.",
+        "message": "All supported tags are properly nested and closed.",
         "steps": steps + ["Input ended with an empty stack: ACCEPT."],
-        "model": "PDA stack model for nested HTML tags"
+        "model": "PDA stack model for a finite set of nested tags"
     }
 
 
