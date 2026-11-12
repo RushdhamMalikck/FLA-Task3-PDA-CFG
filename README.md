@@ -37,6 +37,8 @@ An unmarked palindrome also needs the machine to identify its centre. The NPDA c
 
 **PDA.** The NPDA pushes symbols while reading a guessed first half. An ε-choice changes to the comparison phase; for odd strings, a transition may consume one centre symbol without changing the stack. In the comparison phase, each input symbol must equal and pop the stack top. Accept when input and stored half are both exhausted.
 
+![Palindrome NPDA state diagram](docs/diagrams/palindrome-npda.svg)
+
 **Accepted:** `ε`, `abba`, `abcba` (the app generalizes the formal alphabet beyond `{a,b}`).
 **Rejected:** `ab`, `abc`, `abca`.
 
@@ -58,6 +60,8 @@ The app tries candidate midpoint branches in ordinary Python. That is a simulati
 
 **PDA.** On `<t>`, push `t`; on `</t>`, require `t` at the stack top and pop it. Text leaves the stack unchanged. Accept at end of input with only the bottom marker remaining. A missing, crossed, or unsupported tag rejects.
 
+![Paired-tag PDA state diagram](docs/diagrams/paired-tags-pda.svg)
+
 **Accepted:** `<p></p>`, `<div><p>x</p></div>`, `<ul><li><span>x</span></li></ul>`.
 **Rejected:** `<p>`, `</p>`, `<div><p></div></p>`, `<main></main>`.
 
@@ -70,6 +74,8 @@ For `<div><p>x</p></div>`, the relevant stack trace is `[] → [div] → [div,p]
 **CFG.** `S → (S)S | [S]S | {S}S | ε`. Each non-empty string consists of one balanced outer pair followed by another balanced string. The decomposition is unique, so this grammar is unambiguous.
 
 **PDA.** Push each opening delimiter. On a closer, compare against the top and pop only the matching opener. Reject on an empty stack or a mismatch; accept at end when the stack is empty and no string is left open. After lexical filtering, this is a deterministic pushdown check.
+
+![Programming delimiter PDA state diagram](docs/diagrams/delimiters-pda.svg)
 
 **Accepted:** `()`, `{[()]}`, `if(a){x[0]=(b+c);}`, `call("["); // } ignored`.
 **Rejected:** `(`, `([)]`, `x]`, `"unclosed`.
