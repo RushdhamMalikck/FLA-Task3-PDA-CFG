@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FLA Task 3 | PDA & CFG Case Studies</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">FLA</div>
+    <div>
+      <div class="eyebrow">FORMAL LANGUAGE & AUTOMATA · CLA 2</div>
+      <h1>PDA & CFG Case Study Lab</h1>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="intro">
+      <p class="eyebrow">TASK 3 · INTERACTIVE DEMONSTRATION</p>
+      <h2>Explore how a stack<br>recognises structure.</h2>
+      <p class="intro-copy">Test three practical language-processing examples and inspect the step-by-step stack trace.</p>
+      <div class="chips"><span>Palindrome</span><span>HTML tags</span><span>Code blocks</span></div>
+    </section>
+
+    <section class="workspace">
+      <form method="POST" class="panel">
+        <label for="case">SELECT CASE STUDY</label>
+        <select name="case" id="case" onchange="updateExample()">
+          <option value="palindrome" {% if selected == 'palindrome' %}selected{% endif %}>01 · Palindrome Checker</option>
+          <option value="html" {% if selected == 'html' %}selected{% endif %}>02 · HTML Closing Tag Validator</option>
+          <option value="blocks" {% if selected == 'blocks' %}selected{% endif %}>03 · Programming Block Validator</option>
+        </select>
+
+        <div class="input-heading">
+          <label for="user_input">INPUT STRING / CODE</label>
+          <button type="button" class="sample" onclick="loadExample()">Load example</button>
+        </div>
+        <textarea id="user_input" name="user_input" spellcheck="false" placeholder="Enter your input here...">{{ user_input }}</textarea>
+        <button class="run-button" type="submit">Run validation <span>→</span></button>
+      </form>
+
+      {% if result %}
+      <section class="result-card {% if result.accepted %}accepted{% else %}rejected{% endif %}">
+        <div class="result-top">
+          <div>
+            <p class="eyebrow">VALIDATION RESULT</p>
+            <h2>{{ result.title }}</h2>
+          </div>
+          <div class="status-icon">{% if result.accepted %}✓{% else %}×{% endif %}</div>
+        </div>
+        <p class="result-message">{{ result.message }}</p>
+        <div class="model-label">{{ result.model }}</div>
+        <h3>Stack / PDA processing trace</h3>
+        <ol class="trace">
+          {% for step in result.steps %}
+          <li>{{ step }}</li>
+          {% endfor %}
+        </ol>
+      </section>
+      {% else %}
+      <section class="hint-card">
+        <div class="hint-icon">⌘</div>
+        <h3>Your result will appear here</h3>
+        <p>Choose a case study, enter a sample, and run validation to see whether the input is accepted or rejected.</p>
+      </section>
+      {% endif %}
+    </section>
+
+    <section class="concepts">
+      <div><span class="number">01</span><h3>Define the language</h3><p>Specify which input strings belong to the selected language.</p></div>
+      <div><span class="number">02</span><h3>Use a stack</h3><p>Push opening symbols and pop them when matching closing symbols appear.</p></div>
+      <div><span class="number">03</span><h3>Decide</h3><p>Accept when the input is valid and the stack finishes in its required state.</p></div>
+    </section>
+  </main>
+  <footer>FORMAL LANGUAGE AND AUTOMATA · EDUCATIONAL PDA DEMONSTRATOR</footer>
+
+<script>
+const examples = {
+  palindrome: "abcba",
+  html: "<div><p>Hello</p></div>",
+  blocks: "if(a){ while(b){ x++; } }"
+};
+function loadExample() {
+  document.getElementById("user_input").value =
+    examples[document.getElementById("case").value];
+}
+function updateExample() {
+  document.getElementById("user_input").value =
+    examples[document.getElementById("case").value];
+}
+</script>
+</body>
+</html>
