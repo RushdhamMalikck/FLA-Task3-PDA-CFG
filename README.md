@@ -1,7 +1,7 @@
 # FLA Task 3 — PDA and CFG Case Study Lab
 
 **Course:** 21CSC301T Formal Language and Automata · CLA-2, Assessment Task 3
-**Student:** Rushdham Malik · B.Tech. Artificial Intelligence and Machine Learning **Faculty:** Dr. C. Gunasundari, SRM IST Tiruchirappalli
+**Student:** Rushdham Malik · B.Tech. Artificial Intelligence and Machine Learning **Faculty:** Dr. C. Gunasundari
 
 A Flask demonstration and short formal case-study report on three languages that need stack memory: palindromes, nested paired tags, and programming delimiters. Each case states its language, CFG, PDA model, example processing, and scope.
 
